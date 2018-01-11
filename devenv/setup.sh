@@ -72,8 +72,8 @@ DOCKER_OPTS="-s=${DOCKER_STORAGE_BACKEND_STRING} -r=true --api-cors-header='*' -
 sed -i.bak '/^DOCKER_OPTS=/{h;s|=.*|=\"'"${DOCKER_OPTS}"'\"|};${x;/^$/{s||DOCKER_OPTS=\"'"${DOCKER_OPTS}"'\"|;H};x}' /etc/default/docker
 
 service docker restart
-usermod -a -G docker ubuntu # Add ubuntu user to the docker group
-
+# usermod -a -G docker ubuntu # Add ubuntu user to the docker group
+usermod -a -G docker vagrant # Add vagrant user to the docker group  (default user of box of bento/ubuntu-16.04 is vagrant ,not ubuntu)
 # Test docker
 docker run --rm busybox echo All good
 
@@ -126,7 +126,9 @@ ln -s /opt/gradle-2.12/bin/gradle /usr/bin
 
 # Create directory for the DB
 sudo mkdir -p /var/hyperledger
-sudo chown -R ubuntu:ubuntu /var/hyperledger
+
+#sudo chown -R ubuntu:ubuntu /var/hyperledger
+sudo chown -R vagrant:vagrant /var/hyperledger
 
 # clean any previous builds as they may have image/.dummy files without
 # the backing docker images (since we are, by definition, rebuilding the
@@ -136,7 +138,7 @@ cd $GOPATH/src/github.com/hyperledger/fabric
 make clean gotools
 
 # Ensure permissions are set for GOPATH
-sudo chown -R ubuntu:ubuntu $GOPATH
+sudo chown -R vagrant:vagrant $GOPATH
 
 # Update limits.conf to increase nofiles for LevelDB and network connections
 sudo cp /hyperledger/devenv/limits.conf /etc/security/limits.conf
@@ -151,7 +153,7 @@ EOF
 
 # Set our shell prompt to something less ugly than the default from packer
 # Also make it so that it cd's the user to the fabric dir upon logging in
-cat <<EOF >> /home/ubuntu/.bashrc
+cat <<EOF >> /home/vagrant/.bashrc
 PS1="\u@hyperledger-devenv:$DEVENV_REVISION:\w$ "
 cd $GOPATH/src/github.com/hyperledger/fabric/
 EOF
